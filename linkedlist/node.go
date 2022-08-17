@@ -35,18 +35,17 @@ func (ll *linkedList[T]) removeAtHead() T {
 	ll.accessLock.Lock()
 	defer ll.accessLock.Unlock()
 	if ll.len == 0 {
-		panic("canot remove first of an empty linked list")
+		panic("cannot remove first of an empty linked list")
 	}
-	ll.len -= 1
 	val := ll.head.val
 	if ll.len == 1 {
 		ll.head = nil
 		ll.tail = nil
-		return val
 	} else {
 		ll.head.next.previous = nil
 		ll.head = ll.head.next
 	}
+	ll.len -= 1
 	return val
 }
 
@@ -56,7 +55,6 @@ func (ll *linkedList[T]) removeAtTail() T {
 	if ll.len == 0 {
 		panic("canot remove first of an empty linked list")
 	}
-	ll.len -= 1
 	val := ll.head.val
 	if ll.len == 1 {
 		ll.head = nil
@@ -65,6 +63,7 @@ func (ll *linkedList[T]) removeAtTail() T {
 		ll.tail.previous.next = nil
 		ll.tail = ll.tail.previous
 	}
+	ll.len -= 1
 	return val
 }
 
