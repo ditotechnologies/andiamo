@@ -57,3 +57,16 @@ func TestItemsCh(t *testing.T) {
 	items := s.Items()
 	assert.Equal(t, items, []int{1})
 }
+
+func TestUnion1(t *testing.T) {
+	s1 := New[int]()
+	s1.Add(1)
+	s1.Add(2)
+	s2 := New[int]()
+	s2.Add(2)
+	s2.Add(3)
+	s3 := s1.Union(s2)
+	assert.True(t, s3.Contains(1))
+	assert.True(t, s3.Contains(2))
+	assert.True(t, s3.Contains(3))
+}
