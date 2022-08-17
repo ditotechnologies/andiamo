@@ -86,8 +86,8 @@ func (b *boxInternal[T]) MoveInY(dy T) {
 func (b *boxInternal[T]) ConstrainedTo(other Box[T]) (Box[T], bool) {
 	output, _ := NewWithX1Y1X2Y2[T](
 		b.x1,
-		b.x2,
 		b.y1,
+		b.x2,
 		b.y2,
 	)
 
