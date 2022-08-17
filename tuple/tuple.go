@@ -22,6 +22,6 @@ func (t *internalTuple[T1, T2]) Second() T2 {
 	return t.second
 }
 
-func NewTuple[T1 any, T2 any](first T1, second T2) Tuple[T1, T2] {
+func New[T1 any, T2 any](first T1, second T2) Tuple[T1, T2] {
 	return &internalTuple[T1, T2]{first: first, second: second}
 }
