@@ -10,66 +10,86 @@ type Dimension interface {
 	float64 | float32 | int
 }
 
-type Box[T Dimension] struct {
+type Box[T Dimension] interface {
+	Area() T
+	MinX() T
+	MaxX() T
+	MinY() T
+	MaxY() T
+	Width() T
+	Height() T
+	MidX() T
+	MidY() T
+	Encompasses(Box[T]) bool
+	MoveInX(T)
+	MoveInY(T)
+	ConstrainedTo(Box[T]) (Box[T], bool)
+	Intersects(Box[T]) bool
+	IntersectionBox(Box[T]) (Box[T], bool)
+	ToZeroXY() Box[T]
+	PercentOverlapping(Box[T]) float64
+}
+
+type boxInternal[T Dimension] struct {
 	x1 T
 	y1 T
 	x2 T
 	y2 T
 }
 
-func (b *Box[T]) Area() T {
+func (b *boxInternal[T]) Area() T {
 	return b.Width() * b.Height()
 }
 
-func (b *Box[T]) Width() T {
+func (b *boxInternal[T]) Width() T {
 	return b.x2 - b.x1
 }
 
-func (b *Box[T]) Height() T {
+func (b *boxInternal[T]) Height() T {
 	return b.y2 - b.y1
 }
 
-func (b *Box[T]) MinX() T {
+func (b *boxInternal[T]) MinX() T {
 	return b.x1
 }
 
-func (b *Box[T]) MidX() T {
+func (b *boxInternal[T]) MidX() T {
 	return (b.x1 + b.x2) / 2
 }
 
-func (b *Box[T]) MidY() T {
+func (b *boxInternal[T]) MidY() T {
 	return (b.y1 + b.y2) / 2
 }
 
-func (b *Box[T]) MinY() T {
+func (b *boxInternal[T]) MinY() T {
 	return b.y1
 }
 
-func (b *Box[T]) MaxX() T {
+func (b *boxInternal[T]) MaxX() T {
 	return b.x2
 }
 
-func (b *Box[T]) MaxY() T {
+func (b *boxInternal[T]) MaxY() T {
 	return b.y2
 }
 
-func (b *Box[T]) MoveInX(dx T) {
+func (b *boxInternal[T]) MoveInX(dx T) {
 	b.x1 += dx
 	b.x2 += dx
 }
 
-func (b *Box[T]) MoveInY(dy T) {
+func (b *boxInternal[T]) MoveInY(dy T) {
 	b.y1 += dy
 	b.y2 += dy
 }
 
-func (b Box[T]) ConstrainedTo(other Box[T]) (*Box[T], bool) {
-	output := &Box[T]{
-		x1: b.x1,
-		x2: b.x2,
-		y1: b.y1,
-		y2: b.y2,
-	}
+func (b *boxInternal[T]) ConstrainedTo(other Box[T]) (Box[T], bool) {
+	output, _ := NewWithX1Y1X2Y2[T](
+		b.x1,
+		b.y1,
+		b.x2,
+		b.y2,
+	)
 
 	// first do the x movement
 	if output.MinX() < other.MinX() {
@@ -106,11 +126,11 @@ func (b Box[T]) ConstrainedTo(other Box[T]) (*Box[T], bool) {
 	return output, true
 }
 
-func (b Box[T]) Encompasses(other Box[T]) bool {
+func (b *boxInternal[T]) Encompasses(other Box[T]) bool {
 	return b.MinX() <= other.MinX() && b.MinY() <= other.MinY() && b.MaxX() >= other.MaxX() && b.MaxY() >= other.MaxX()
 }
 
-func (b Box[T]) Intersects(other Box[T]) bool {
+func (b *boxInternal[T]) Intersects(other Box[T]) bool {
 	if b.Encompasses(other) || other.Encompasses(b) {
 		return true
 	}
@@ -119,8 +139,8 @@ func (b Box[T]) Intersects(other Box[T]) bool {
 	return xIntersects && yIntersects
 }
 
-func (b *Box[T]) ToZeroXY() Box[T] {
-	return Box[T]{
+func (b *boxInternal[T]) ToZeroXY() Box[T] {
+	return &boxInternal[T]{
 		x1: 0,
 		x2: b.x2 - b.x1,
 		y1: 0,
@@ -128,10 +148,10 @@ func (b *Box[T]) ToZeroXY() Box[T] {
 	}
 }
 
-func (b Box[T]) IntersectionBox(other Box[T]) (*Box[T], bool) {
+func (b *boxInternal[T]) IntersectionBox(other Box[T]) (Box[T], bool) {
 	if b == other || other.Encompasses(b) {
 		output := b.ToZeroXY()
-		return &output, true
+		return output, true
 	}
 
 	if !b.Intersects(other) {
@@ -162,7 +182,7 @@ func (b Box[T]) IntersectionBox(other Box[T]) (*Box[T], bool) {
 
 }
 
-func (b Box[T]) PercentOverlapping(other Box[T]) float64 {
+func (b *boxInternal[T]) PercentOverlapping(other Box[T]) float64 {
 	if !b.Intersects(other) {
 		return 0
 	}
@@ -192,7 +212,7 @@ func (b Box[T]) PercentOverlapping(other Box[T]) float64 {
 }
 
 func NewZero[T Dimension]() Box[T] {
-	return Box[T]{
+	return &boxInternal[T]{
 		x1: 0,
 		y1: 0,
 		x2: 0,
@@ -200,11 +220,11 @@ func NewZero[T Dimension]() Box[T] {
 	}
 }
 
-func NewWithX1Y1X2Y2[T Dimension](x1 T, y1 T, x2 T, y2 T) (*Box[T], bool) {
+func NewWithX1Y1X2Y2[T Dimension](x1 T, y1 T, x2 T, y2 T) (Box[T], bool) {
 	if x1 > x2 || y1 > y2 {
 		return nil, false
 	}
-	return &Box[T]{
+	return &boxInternal[T]{
 		x1: x1,
 		y1: y1,
 		x2: x2,
@@ -212,11 +232,6 @@ func NewWithX1Y1X2Y2[T Dimension](x1 T, y1 T, x2 T, y2 T) (*Box[T], bool) {
 	}, true
 }
 
-func NewWithXYWidthHeight[T Dimension](x1 T, y1 T, width T, height T) Box[T] {
-	return Box[T]{
-		x1: x1,
-		y1: y1,
-		x2: x1 + width,
-		y2: y1 + height,
-	}
+func NewWithXYWidthHeight[T Dimension](x1 T, y1 T, width T, height T) (Box[T], bool) {
+	return NewWithX1Y1X2Y2(x1, y1, x1+width, y1+height)
 }
