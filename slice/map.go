@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Dito Technologies LLC. All rights reserved.
+ */
+
 package slice
 
 func mapElemToCh[Elem any, Output any](elem Elem, idx int, mapFun func(Elem, int) Output) <-chan Output {

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Dito Technologies LLC. All rights reserved.
+ */
+
 package slice
 
 import (
