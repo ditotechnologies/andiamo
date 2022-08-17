@@ -9,12 +9,12 @@ import (
 	"sync"
 )
 
-func MergeToSlice[T any](ctx context.Context, chs []<-chan T) []T {
-	combined := Merge(ctx, chs)
+func FanInToSlice[T any](ctx context.Context, chs []<-chan T) []T {
+	combined := FanIn(ctx, chs)
 	return ToSlice(combined)
 }
 
-func Merge[T any](ctx context.Context, chs []<-chan T) <-chan T {
+func FanIn[T any](ctx context.Context, chs []<-chan T) <-chan T {
 	output := make(chan T)
 	go func() {
 		defer close(output)
