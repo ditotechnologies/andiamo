@@ -7,7 +7,9 @@ package optional
 
 // Optional The interface that implements the optional data structure
 type Optional[T any] interface {
+	// HasValue Returns true if the optional has a value (AKA it was created with [NewWithValue]) or false otherwise.
 	HasValue() bool
+	// Value Returns the value wrapped by the optional. Or, panics if [HasValue] returns false.
 	Value() T
 }
 
@@ -16,12 +18,10 @@ type internalOptional[T any] struct {
 	value    T
 }
 
-// HasValue Returns true if the optional has a value (AKA it was created with [NewWithValue]) or false otherwise.
 func (o *internalOptional[T]) HasValue() bool {
 	return o.hasValue
 }
 
-// Value Returns the value wrapped by the optional. Or, panics if [HasValue] returns false.
 func (o *internalOptional[T]) Value() T {
 	if !o.hasValue {
 		panic("cannot access the value of an optional without a value")
@@ -29,6 +29,7 @@ func (o *internalOptional[T]) Value() T {
 	return o.value
 }
 
+// NewWithValue Creates a new optional where [HasValue()] will return true and [Value()] will return the value passed in.
 func NewWithValue[T any](value T) Optional[T] {
 	return &internalOptional[T]{
 		hasValue: true,
@@ -36,6 +37,7 @@ func NewWithValue[T any](value T) Optional[T] {
 	}
 }
 
+// NewEmpty Creates a new optional where [HasValue()] will return false
 func NewEmpty[T any]() Optional[T] {
 	return &internalOptional[T]{
 		hasValue: false,
