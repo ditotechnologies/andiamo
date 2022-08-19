@@ -66,7 +66,20 @@ func TestUnion1(t *testing.T) {
 	s2.Add(2)
 	s2.Add(3)
 	s3 := s1.Union(s2)
+	assert.Equal(t, s3.Len(), 3)
 	assert.True(t, s3.Contains(1))
 	assert.True(t, s3.Contains(2))
 	assert.True(t, s3.Contains(3))
+}
+
+func TestIntersection1(t *testing.T) {
+	s1 := New[int]()
+	s1.Add(1)
+	s1.Add(2)
+	s2 := New[int]()
+	s2.Add(2)
+	s2.Add(3)
+	s3 := s1.Intersection(s2)
+	assert.Equal(t, s3.Len(), 1)
+	assert.True(t, s3.Contains(2))
 }
