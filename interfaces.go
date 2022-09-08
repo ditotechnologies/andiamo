@@ -2,7 +2,7 @@
  * Copyright (c) Dito Technologies LLC. All rights reserved.
  */
 
-package collection
+package andiamo
 
 type Collection interface {
 	Len() int
