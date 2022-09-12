@@ -4,6 +4,8 @@
 
 package slice
 
+import "golang.org/x/exp/constraints"
+
 func mergeSortStep[Elem any](slice []Elem, comparator func(Elem, Elem) bool, startIdx int, endIdx int) <-chan Elem {
 	output := make(chan Elem)
 	go func() {
@@ -64,7 +66,22 @@ func mergeSortStep[Elem any](slice []Elem, comparator func(Elem, Elem) bool, sta
 	return output
 }
 
-func MergeSort[Elem any](slice []Elem, comparator func(Elem, Elem) bool) []Elem {
+func MergeSort[Elem constraints.Ordered](slice []Elem) []Elem {
+	return MergeSortWithIsAscending(slice, true)
+}
+
+func MergeSortWithIsAscending[Elem constraints.Ordered](slice []Elem, ascending bool) []Elem {
+	if ascending {
+		return MergeSortWithComparator[Elem](slice, func(x1 Elem, x2 Elem) bool {
+			return x1 < x2
+		})
+	}
+	return MergeSortWithComparator(slice, func(x1 Elem, x2 Elem) bool {
+		return x1 > x2
+	})
+}
+
+func MergeSortWithComparator[Elem any](slice []Elem, comparator func(Elem, Elem) bool) []Elem {
 	if len(slice) <= 1 {
 		return slice
 	}

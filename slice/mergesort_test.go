@@ -11,7 +11,7 @@ import (
 
 func TestMergeSort1(t *testing.T) {
 	testArr := []int{0, 3, 2, 1, 4}
-	outputSmallestToBiggest := MergeSort(testArr, func(c1 int, c2 int) bool {
+	outputSmallestToBiggest := MergeSortWithComparator(testArr, func(c1 int, c2 int) bool {
 		return c1 < c2
 	})
 	assert.Equal(t, len(outputSmallestToBiggest), len(testArr))
@@ -23,8 +23,8 @@ func TestMergeSort1(t *testing.T) {
 }
 
 func TestMergeSort2(t *testing.T) {
-	testArr := []int{}
-	output := MergeSort(testArr, func(c1 int, c2 int) bool {
+	var testArr []int
+	output := MergeSortWithComparator(testArr, func(c1 int, c2 int) bool {
 		return c1 < c2
 	})
 	assert.Equal(t, len(output), len(testArr))
