@@ -7,7 +7,6 @@ package channel
 import (
 	"context"
 	"github.com/ditotechnologies/andiamo/either"
-	"github.com/ditotechnologies/andiamo/slice"
 	"sync"
 )
 
@@ -35,22 +34,32 @@ func ParallelizeFunctions[T any](ctx context.Context, fns []func() T) <-chan T {
 }
 
 // ParallelizeFunctionsToResultAndError Runs functions in parallel and then outputs the result to an array or an error.
-// results are not ordered
+// results are ordered
 func ParallelizeFunctionsToResultAndError[T any](_ctx context.Context, fns []func() (T, error)) ([]T, error) {
 	ctx, cancel := context.WithCancel(_ctx)
 	defer cancel()
-	wrappedFunctions := slice.Map[func() (T, error), func() either.Either[T, error]](fns, func(fn func() (T, error)) func() either.Either[T, error] {
-		return func() either.Either[T, error] {
-			return either.FunctionResultOrError(fn)
-		}
-	})
-	ch := ParallelizeFunctions[either.Either[T, error]](ctx, wrappedFunctions)
+
+	channels := make([]chan either.Either[T, error], 0)
+
+	for _, _fn := range fns {
+		_ch := make(chan either.Either[T, error])
+		go func(ch chan either.Either[T, error], fn func() (T, error)) {
+			defer close(ch)
+			select {
+			case <-ctx.Done():
+			case _ch <- either.FunctionResultOrError(fn):
+			}
+		}(_ch, _fn)
+		channels = append(channels, _ch)
+	}
+
 	collected := make([]T, 0)
-	for elem := range ch {
-		if !elem.IsLeft() {
-			return nil, elem.Right()
+	for _, ch := range channels {
+		result := <-ch
+		if !result.IsLeft() {
+			return nil, result.Right()
 		}
-		collected = append(collected, elem.Left())
+		collected = append(collected, result.Left())
 	}
 	return collected, nil
 }
