@@ -24,3 +24,17 @@ func TestFilter2(t *testing.T) {
 	})
 	assert.Equal(t, output, []int{0, 2, 3})
 }
+
+type testStruct struct {
+	x int
+}
+
+func TestFilterNilsAndDereference1(t *testing.T) {
+	e1 := testStruct{
+		x: 10,
+	}
+	slice := []*testStruct{&e1, nil}
+	output := FilterNilsAndDereference(slice)
+	assert.Equal(t, len(output), 1)
+	assert.Equal(t, output[0].x, 10)
+}

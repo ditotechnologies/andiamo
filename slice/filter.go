@@ -28,3 +28,19 @@ func Filter[Elem any](slice []Elem, filterFn func(Elem) bool) []Elem {
 	}
 	return output
 }
+
+func FilterNils[Elem any](slice []*Elem) []*Elem {
+	return Filter(
+		slice,
+		func(e *Elem) bool {
+			return e != nil
+		},
+	)
+}
+
+// FilterNilsAndDereference Filters out the nils and returns a deferenced item
+func FilterNilsAndDereference[Elem any](slice []*Elem) []Elem {
+	return Map(FilterNils(slice), func(elem *Elem) Elem {
+		return *elem
+	})
+}
