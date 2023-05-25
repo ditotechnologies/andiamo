@@ -83,3 +83,8 @@ func TestIntersection1(t *testing.T) {
 	assert.Equal(t, s3.Len(), 1)
 	assert.True(t, s3.Contains(2))
 }
+
+func TestNewWithItems(t *testing.T) {
+	s1 := NewWithSlice([]int{0, 1, 2})
+	assert.Equal(t, s1.Len(), 3)
+}

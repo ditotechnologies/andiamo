@@ -127,6 +127,14 @@ func (s *internalSet[T]) ForEach(fn func(elem T)) {
 	wg.Wait()
 }
 
+func NewWithSlice[T comparable](items []T) Set[T] {
+	newSet := New[T]()
+	for _, item := range items {
+		newSet.Add(item)
+	}
+	return newSet
+}
+
 func New[T comparable]() Set[T] {
 	s := internalSet[T]{
 		underlyingData: make(map[T]bool),
