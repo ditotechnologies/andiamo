@@ -18,6 +18,7 @@ type Set[T comparable] interface {
 	Len() int
 	Union(Set[T]) Set[T]
 	Intersection(Set[T]) Set[T]
+	Difference(Set[T]) Set[T]
 	ForEach(func(T))
 }
 
@@ -90,6 +91,16 @@ func (s *internalSet[T]) Union(other Set[T]) Set[T] {
 	})
 	other.ForEach(func(elem T) {
 		output.Add(elem)
+	})
+	return output
+}
+
+func (s *internalSet[T]) Difference(other Set[T]) Set[T] {
+	output := New[T]()
+	s.ForEach(func(elem T) {
+		if !other.Contains(elem) {
+			output.Add(elem)
+		}
 	})
 	return output
 }

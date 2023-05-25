@@ -88,3 +88,32 @@ func TestNewWithItems(t *testing.T) {
 	s1 := NewWithSlice([]int{0, 1, 2})
 	assert.Equal(t, s1.Len(), 3)
 }
+
+func TestDifference1(t *testing.T) {
+	s1 := NewWithSlice([]int{0, 1, 2})
+	s2 := NewWithSlice([]int{0, 1, 2})
+	output := s1.Difference(s2)
+	assert.Equal(t, output.Len(), 0)
+}
+
+func TestDifference2(t *testing.T) {
+	s1 := NewWithSlice([]int{0, 1, 2})
+	s2 := NewWithSlice([]int{})
+	output := s1.Difference(s2)
+	assert.Equal(t, output.Len(), 3)
+}
+
+func TestDifference3(t *testing.T) {
+	s1 := NewWithSlice([]int{0, 1, 2})
+	s2 := NewWithSlice([]int{})
+	output := s2.Difference(s1)
+	assert.Equal(t, output.Len(), 0)
+}
+
+func TestDifference4(t *testing.T) {
+	s1 := NewWithSlice([]int{0, 1, 2})
+	s2 := NewWithSlice([]int{0, 1, 3})
+	output := s1.Difference(s2)
+	assert.Equal(t, output.Len(), 1)
+	assert.True(t, output.Contains(2))
+}
